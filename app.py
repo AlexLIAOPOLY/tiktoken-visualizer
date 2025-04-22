@@ -20,7 +20,7 @@ def index():
     """Serve the main HTML page"""
     return send_from_directory('static', 'index.html')
 
-@app.route('/examples')
+@app.route('/examples.html')
 def examples():
     """Serve the examples HTML page"""
     return send_from_directory('static', 'examples.html')
