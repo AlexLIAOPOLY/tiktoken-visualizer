@@ -4,117 +4,235 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiktoken Visualizer - Examples</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     <style>
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
+        :root {
+            --primary-color: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary-color: #64748b;
+            --background-light: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --border-radius: 12px;
+            --transition-speed: 0.3s;
         }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background-color: var(--background-light);
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
         .example-section {
             background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
         }
+
+        .example-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
         .example-code {
-            background-color: #f5f5f5;
-            padding: 15px;
-            border-radius: 5px;
-            font-family: monospace;
-            margin: 10px 0;
+            background-color: #f1f5f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            margin: 1rem 0;
             overflow-x: auto;
+            border: 1px solid #e2e8f0;
         }
+
         .nav-links {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem 0;
         }
+
         .btn {
             background-color: var(--primary-color);
             color: white;
-            padding: 8px 16px;
+            padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             text-decoration: none;
-            transition: background-color 0.3s;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
+
         .btn:hover {
             background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .steps-list {
+            list-style-type: none;
+            padding: 0;
+            counter-reset: step;
+        }
+
+        .steps-list li {
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 1rem;
+            counter-increment: step;
+        }
+
+        .steps-list li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1.75rem;
+            height: 1.75rem;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .expected-result {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background-color: #e2e8f0;
+            color: var(--text-secondary);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="nav-links">
-            <a href="/" class="btn">返回主页</a>
+            <a href="/" class="btn">← Back to Home</a>
         </div>
         
-        <h1>Tiktoken 可视化工具使用示例</h1>
+        <h1>Tiktoken Visualizer Examples</h1>
         
         <div class="example-section">
-            <h2>示例 1: 基础分词</h2>
-            <p>这个示例展示了如何使用cl100k_base编码器对一段英文文本进行分词：</p>
-            <ol>
-                <li>选择 "cl100k_base" 编码器</li>
-                <li>输入文本: "Hello world! This is an example of tokenization."</li>
-                <li>点击 "Encode" 按钮</li>
-                <li>观察分词结果</li>
-            </ol>
-            <p>预期结果: 文本将被分解为多个词元 (tokens)，例如 ["Hello", "world", "!", ...]</p>
-        </div>
-        
-        <div class="example-section">
-            <h2>示例 2: 使用特殊词元</h2>
-            <p>这个示例展示如何处理特殊词元，如GPT模型使用的&lt;|endoftext|&gt;标记：</p>
-            <ol>
-                <li>启用 "Allow Special Tokens" 选项</li>
-                <li>添加特殊词元: "&lt;|endoftext|&gt;"</li>
-                <li>在文本框中输入: "This is a test.&lt;|endoftext|&gt;Another message."</li>
-                <li>点击 "Encode" 按钮</li>
-            </ol>
-            <p>预期结果: &lt;|endoftext|&gt;会被识别为单个特殊词元，而不是多个字符</p>
+            <h2>Example 1: Basic Tokenization</h2>
+            <div class="tag">Beginner</div>
+            <p>Learn how to tokenize English text using the cl100k_base encoder:</p>
+            <div class="steps-list">
+                <li>Select the "cl100k_base" encoder from the dropdown menu</li>
+                <li>Enter the text: "Hello world! This is an example of tokenization."</li>
+                <li>Click the "Encode" button to process the text</li>
+                <li>Observe the tokenization results in real-time</li>
+            </div>
+            <div class="expected-result">
+                <strong>Expected Output:</strong> The text will be broken down into tokens, such as ["Hello", "world", "!", ...] with corresponding token IDs.
+            </div>
         </div>
         
         <div class="example-section">
-            <h2>示例 3: 可视化词元分布</h2>
-            <p>这个示例展示如何查看词元的3D可视化：</p>
-            <ol>
-                <li>输入一段较长文本（至少20个词元）</li>
-                <li>对文本进行编码</li>
-                <li>点击 "Visualize" 按钮</li>
-                <li>切换到 "3D Vectors" 标签</li>
-            </ol>
-            <p>3D可视化将展示词元在空间中的分布，类似的词元会聚集在一起</p>
+            <h2>Example 2: Special Tokens Handling</h2>
+            <div class="tag">Intermediate</div>
+            <p>Discover how to work with special tokens like the GPT model's &lt;|endoftext|&gt; marker:</p>
+            <div class="steps-list">
+                <li>Enable the "Allow Special Tokens" option in the settings</li>
+                <li>Add the special token: "&lt;|endoftext|&gt;"</li>
+                <li>Input the following text: "This is a test.&lt;|endoftext|&gt;Another message."</li>
+                <li>Click "Encode" to see how special tokens are processed</li>
+            </div>
+            <div class="expected-result">
+                <strong>Expected Output:</strong> The &lt;|endoftext|&gt; will be recognized as a single special token rather than individual characters.
+            </div>
         </div>
         
         <div class="example-section">
-            <h2>示例 4: 编码和解码测试</h2>
-            <p>通过编码再解码验证词元化的可逆性：</p>
-            <ol>
-                <li>选择任意编码器</li>
-                <li>输入一段文本</li>
-                <li>点击 "Encode" 按钮</li>
-                <li>查看生成的词元</li>
-                <li>点击 "Decode" 按钮</li>
-                <li>比较原始文本和解码文本</li>
-            </ol>
-            <p>如果一切正常，解码后的文本应与原始文本完全相同</p>
+            <h2>Example 3: Token Distribution Visualization</h2>
+            <div class="tag">Advanced</div>
+            <p>Explore the 3D visualization of token distributions:</p>
+            <div class="steps-list">
+                <li>Enter a longer text passage (minimum 20 tokens)</li>
+                <li>Process the text using the encoder</li>
+                <li>Click the "Visualize" button to generate the visualization</li>
+                <li>Switch to the "3D Vectors" tab to explore the token space</li>
+            </div>
+            <div class="expected-result">
+                <strong>Expected Output:</strong> A 3D visualization showing how tokens cluster in the vector space, with similar tokens positioned closer together.
+            </div>
         </div>
         
         <div class="example-section">
-            <h2>示例 5: 不同编码器比较</h2>
-            <p>这个示例比较不同编码器的分词差异：</p>
-            <ol>
-                <li>输入文本: "Machine learning is fascinating!"</li>
-                <li>使用cl100k_base编码，记录词元数</li>
-                <li>切换到p50k_base，再次编码，比较词元数</li>
-                <li>切换到r50k_base，再次编码，比较词元数</li>
-            </ol>
-            <p>不同编码器可能产生不同数量的词元，反映它们的训练方式差异</p>
+            <h2>Example 4: Encode-Decode Verification</h2>
+            <div class="tag">Intermediate</div>
+            <p>Verify the reversibility of tokenization through encode-decode testing:</p>
+            <div class="steps-list">
+                <li>Choose any available encoder from the options</li>
+                <li>Input your desired text for testing</li>
+                <li>Click "Encode" to generate tokens</li>
+                <li>Review the generated token sequence</li>
+                <li>Click "Decode" to reconstruct the text</li>
+                <li>Compare the original and reconstructed text</li>
+            </div>
+            <div class="expected-result">
+                <strong>Expected Output:</strong> The decoded text should match the original input exactly, demonstrating perfect reconstruction.
+            </div>
+        </div>
+        
+        <div class="example-section">
+            <h2>Example 5: Encoder Comparison</h2>
+            <div class="tag">Advanced</div>
+            <p>Compare tokenization differences across various encoders:</p>
+            <div class="steps-list">
+                <li>Enter the text: "Machine learning is fascinating!"</li>
+                <li>Record token count using cl100k_base encoder</li>
+                <li>Switch to p50k_base and compare the token count</li>
+                <li>Finally, test with r50k_base and note the differences</li>
+            </div>
+            <div class="expected-result">
+                <strong>Expected Output:</strong> Different token counts and segmentation patterns will emerge, highlighting each encoder's unique characteristics.
+            </div>
         </div>
     </div>
 </body>
