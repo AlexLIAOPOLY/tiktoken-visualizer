@@ -27,8 +27,12 @@ class Colors:
     RED = '\033[0;31m'
     NC = '\033[0m'  # No color
 
-# 虚拟环境目录
-VENV_DIR = "tiktoken_env"
+# 获取脚本所在目录的绝对路径
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# 虚拟环境目录 - 现在使用绝对路径
+VENV_DIR = os.path.join(SCRIPT_DIR, "tiktoken_env")
+# 应用目录
+APP_DIR = SCRIPT_DIR
 
 # 所需Python依赖
 DEPENDENCIES = ["tiktoken==0.5.1", "flask", "flask-cors", "regex", "numpy", "scikit-learn"]
@@ -38,9 +42,9 @@ def print_color(text, color):
     print(f"{color}{text}{Colors.NC}")
 
 # 执行命令并返回输出
-def run_command(cmd, shell=True, env=None):
+def run_command(cmd, shell=True, env=None, cwd=None):
     try:
-        result = subprocess.run(cmd, shell=shell, check=True, capture_output=True, text=True, env=env)
+        result = subprocess.run(cmd, shell=shell, check=True, capture_output=True, text=True, env=env, cwd=cwd)
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
         print_color(f"Error executing command: {cmd}", Colors.RED)
@@ -117,7 +121,7 @@ def install_dependencies():
 # 处理导入冲突
 def handle_import_conflicts():
     temp_name = None
-    tiktoken_dir = Path("tiktoken")
+    tiktoken_dir = Path(os.path.join(APP_DIR, "tiktoken"))
     
     if tiktoken_dir.is_dir():
         print_color("Local tiktoken directory detected, may cause import conflicts", Colors.YELLOW)
@@ -125,20 +129,21 @@ def handle_import_conflicts():
         
         if choice.lower() in ['y', 'yes']:
             temp_name = f"tiktoken_temp_{int(time.time())}"
-            shutil.move("tiktoken", temp_name)
+            shutil.move(str(tiktoken_dir), os.path.join(APP_DIR, temp_name))
             print_color(f"Renamed tiktoken directory to {temp_name}", Colors.GREEN)
     
     return temp_name
 
 # 恢复原始名称
 def restore_tiktoken(temp_name):
-    if temp_name and os.path.exists(temp_name):
-        if os.path.exists("tiktoken"):
+    if temp_name and os.path.exists(os.path.join(APP_DIR, temp_name)):
+        tiktoken_path = os.path.join(APP_DIR, "tiktoken")
+        if os.path.exists(tiktoken_path):
             backup_name = f"tiktoken_backup_{int(time.time())}"
             print_color(f"tiktoken directory already exists, renaming it to {backup_name}", Colors.YELLOW)
-            shutil.move("tiktoken", backup_name)
+            shutil.move(tiktoken_path, os.path.join(APP_DIR, backup_name))
         
-        shutil.move(temp_name, "tiktoken")
+        shutil.move(os.path.join(APP_DIR, temp_name), tiktoken_path)
         print_color(f"Restored {temp_name} to tiktoken", Colors.GREEN)
 
 # 查找一个可用的端口
@@ -152,7 +157,6 @@ def find_available_port(start=8080, end=8100):
 
 # 获取服务器端口
 def get_server_port(log_file, default=8080):
-    # 等待日志文件出现并包含端口信息
     timeout = 10
     start_time = time.time()
     
@@ -208,13 +212,14 @@ def main():
     # 准备启动应用程序
     print_color("Starting Tiktoken Visualizer...", Colors.BLUE)
     
-    log_file = "app_output.log"
+    log_file = os.path.join(APP_DIR, "app_output.log")
     python, _ = get_venv_executables()
     
     # 在子进程中启动应用程序
     process = subprocess.Popen(
-        f'"{python}" app.py > {log_file} 2>&1',
-        shell=True
+        f'"{python}" "{os.path.join(APP_DIR, "app.py")}" > "{log_file}" 2>&1',
+        shell=True,
+        cwd=APP_DIR  # 设置工作目录为应用目录
     )
     
     # 等待服务器启动
