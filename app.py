@@ -20,6 +20,11 @@ def index():
     """Serve the main HTML page"""
     return send_from_directory('static', 'index.html')
 
+@app.route('/examples')
+def examples():
+    """Serve the examples HTML page"""
+    return send_from_directory('static', 'examples.html')
+
 # Add static file routes
 @app.route('/css/<path:filename>')
 def serve_css(filename):
