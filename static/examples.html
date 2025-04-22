@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiktoken Visualizer - Examples</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .example-section {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .example-code {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-links">
+            <a href="/" class="btn">返回主页</a>
+        </div>
+        
+        <h1>Tiktoken 可视化工具使用示例</h1>
+        
+        <div class="example-section">
+            <h2>示例 1: 基础分词</h2>
+            <p>这个示例展示了如何使用cl100k_base编码器对一段英文文本进行分词：</p>
+            <ol>
+                <li>选择 "cl100k_base" 编码器</li>
+                <li>输入文本: "Hello world! This is an example of tokenization."</li>
+                <li>点击 "Encode" 按钮</li>
+                <li>观察分词结果</li>
+            </ol>
+            <p>预期结果: 文本将被分解为多个词元 (tokens)，例如 ["Hello", "world", "!", ...]</p>
+        </div>
+        
+        <div class="example-section">
+            <h2>示例 2: 使用特殊词元</h2>
+            <p>这个示例展示如何处理特殊词元，如GPT模型使用的&lt;|endoftext|&gt;标记：</p>
+            <ol>
+                <li>启用 "Allow Special Tokens" 选项</li>
+                <li>添加特殊词元: "&lt;|endoftext|&gt;"</li>
+                <li>在文本框中输入: "This is a test.&lt;|endoftext|&gt;Another message."</li>
+                <li>点击 "Encode" 按钮</li>
+            </ol>
+            <p>预期结果: &lt;|endoftext|&gt;会被识别为单个特殊词元，而不是多个字符</p>
+        </div>
+        
+        <div class="example-section">
+            <h2>示例 3: 可视化词元分布</h2>
+            <p>这个示例展示如何查看词元的3D可视化：</p>
+            <ol>
+                <li>输入一段较长文本（至少20个词元）</li>
+                <li>对文本进行编码</li>
+                <li>点击 "Visualize" 按钮</li>
+                <li>切换到 "3D Vectors" 标签</li>
+            </ol>
+            <p>3D可视化将展示词元在空间中的分布，类似的词元会聚集在一起</p>
+        </div>
+        
+        <div class="example-section">
+            <h2>示例 4: 编码和解码测试</h2>
+            <p>通过编码再解码验证词元化的可逆性：</p>
+            <ol>
+                <li>选择任意编码器</li>
+                <li>输入一段文本</li>
+                <li>点击 "Encode" 按钮</li>
+                <li>查看生成的词元</li>
+                <li>点击 "Decode" 按钮</li>
+                <li>比较原始文本和解码文本</li>
+            </ol>
+            <p>如果一切正常，解码后的文本应与原始文本完全相同</p>
+        </div>
+        
+        <div class="example-section">
+            <h2>示例 5: 不同编码器比较</h2>
+            <p>这个示例比较不同编码器的分词差异：</p>
+            <ol>
+                <li>输入文本: "Machine learning is fascinating!"</li>
+                <li>使用cl100k_base编码，记录词元数</li>
+                <li>切换到p50k_base，再次编码，比较词元数</li>
+                <li>切换到r50k_base，再次编码，比较词元数</li>
+            </ol>
+            <p>不同编码器可能产生不同数量的词元，反映它们的训练方式差异</p>
+        </div>
+    </div>
+</body>
+</html> 

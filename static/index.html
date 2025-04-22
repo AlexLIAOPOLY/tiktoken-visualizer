@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiktoken Visualizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Three.js with properly imported OrbitControls -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.156.1/build/three.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header animate__animated animate__fadeIn">
+            <div class="logo-container">
+                <img src="img/tiktoken-logo.svg" alt="Tiktoken Logo" class="logo">
+                <h1>Tiktoken Visualizer</h1>
+            </div>
+            <p class="subtitle">Interactive tokenization tool for OpenAI models</p>
+            <div class="header-links">
+                <a href="/examples.html" class="header-link">Examples</a>
+                <a href="https://github.com/openai/tiktoken" target="_blank" class="header-link">GitHub</a>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="control-panel animate__animated animate__fadeInLeft">
+                <div class="panel-section">
+                    <h2>
+                        Encoder Selection
+                        <span class="info-icon" id="encoder-select-info">
+                            <span class="material-icons">help_outline</span>
+                            <div class="tooltip">
+                                <h4>About Encoders</h4>
+                                <p>Different models use different tokenization encoders. Select the encoder that matches your model:</p>
+                                <ul>
+                                    <li><strong>cl100k_base</strong>: Used by GPT-4, GPT-3.5-Turbo, text-embedding-ada-002</li>
+                                    <li><strong>p50k_base</strong>: Used by text-davinci-003, text-davinci-002, code-davinci-002</li>
+                                    <li><strong>r50k_base</strong>: Used by davinci, curie, babbage, ada</li>
+                                </ul>
+                                <p>The encoder determines how text is split into tokens and affects the token count.</p>
+                            </div>
+                        </span>
+                    </h2>
+                    <div class="encoder-dropdown">
+                        <select id="encoder-select" class="custom-select">
+                            <option value="" disabled selected>Select an encoder</option>
+                        </select>
+                        <div class="encoder-info">
+                            <span id="encoder-info-text">No encoder selected</span>
+                            <button id="encoder-details-btn" class="btn-small">Details</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2>
+                        Special Tokens
+                        <span class="info-icon" id="special-tokens-info">
+                            <span class="material-icons">help_outline</span>
+                            <div class="tooltip">
+                                <h4>About Special Tokens</h4>
+                                <p>Special tokens are specific character sequences like <code>&lt;|endoftext|&gt;</code> that have special meaning in language models.</p>
+                                <p><strong>How to use:</strong></p>
+                                <ol>
+                                    <li>Enable "Allow Special Tokens"</li>
+                                    <li>Add your special token (e.g. <code>&lt;|endoftext|&gt;</code>) and press Enter</li>
+                                    <li>Include the same token in your input text</li>
+                                    <li>When encoded, the token will be treated as a single token instead of multiple characters</li>
+                                </ol>
+                                <p>Common tokens: <code>&lt;|endoftext|&gt;</code>, <code>&lt;|im_start|&gt;</code>, <code>&lt;|im_end|&gt;</code></p>
+                            </div>
+                        </span>
+                    </h2>
+                    <div class="special-tokens-control">
+                        <label class="toggle-container">
+                            <input type="checkbox" id="allow-special-toggle">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Allow Special Tokens</span>
+                        </label>
+                        <div class="special-tokens-input" id="special-tokens-container">
+                            <input type="text" id="special-tokens-input" placeholder="e.g. <|endoftext|>" disabled>
+                            <div class="tokens-chip-container" id="tokens-chip-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-processing-container animate__animated animate__fadeInRight">
+                <div class="input-output-panels">
+                    <div class="text-panel">
+                        <div class="panel-header">
+                            <h3>Input Text</h3>
+                            <div class="panel-actions">
+                                <button id="clear-text-btn" class="action-btn animate-button">
+                                    <span class="material-icons" style="font-size: 16px;">delete</span>
+                                    Clear
+                                </button>
+                                <button id="sample-text-btn" class="action-btn animate-button">
+                                    <span class="material-icons" style="font-size: 16px;">auto_awesome</span>
+                                    Sample
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="input-text" placeholder="Enter text to encode..."></textarea>
+                        <div class="button-row">
+                            <button id="encode-btn" class="action-btn primary-btn animate-button">
+                                <span class="material-icons">code</span>
+                                Encode
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="decoded-panel">
+                        <div class="panel-header">
+                            <h3>Decoded Text</h3>
+                            <div class="panel-actions">
+                                <button id="copy-decoded-btn" class="action-btn animate-button">
+                                    <span class="material-icons" style="font-size: 16px;">content_copy</span>
+                                    Copy
+                                </button>
+                                <button id="clear-decoded-btn" class="action-btn animate-button">
+                                    <span class="material-icons" style="font-size: 16px;">delete</span>
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                        <div id="decoded-display" class="decoded-display">
+                            <p class="empty-message">Decoded text will appear here...</p>
+                        </div>
+                    </div>
+
+                    <div class="token-panel">
+                        <div class="panel-header">
+                            <h2>
+                                Token Results
+                                <span class="info-icon" id="token-results-info">
+                                    <span class="material-icons">help_outline</span>
+                                    <div class="tooltip">
+                                        <h4>About Token Results</h4>
+                                        <p>This panel shows the numeric token IDs that represent your text.</p>
+                                        <p><strong>Features:</strong></p>
+                                        <ul>
+                                            <li>Click on any token to view detailed information</li>
+                                            <li>Use the "Visualize" button to see different token visualizations</li>
+                                            <li>Use the "Decode" button to convert tokens back to text</li>
+                                        </ul>
+                                        <p>Each number represents a token in the model's vocabulary. Hover over tokens to see the text they represent.</p>
+                                    </div>
+                                </span>
+                            </h2>
+                            <div class="panel-controls">
+                                <button id="copy-tokens-btn" class="btn-small animate-button">
+                                    <span class="material-icons" style="font-size: 16px;">content_copy</span>
+                                    Copy
+                                </button>
+                                <button id="visualize-btn" class="btn-small animate-button">
+                                    <span class="material-icons" style="font-size: 16px;">visibility</span>
+                                    Visualize
+                                </button>
+                            </div>
+                        </div>
+                        <div id="tokens-container" class="tokens-display">
+                            <p class="placeholder-text">Tokens will appear here</p>
+                        </div>
+                        <div class="button-row">
+                            <button id="decode-btn" class="action-btn animate-button">
+                                <span class="material-icons">play_arrow</span>
+                                Decode
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-container">
+                    <div class="stats-box animate__animated animate__fadeInUp">
+                        <div class="stat-item">
+                            <span class="stat-label">
+                                Token Count
+                                <span class="info-icon small">
+                                    <span class="material-icons">help_outline</span>
+                                    <div class="tooltip tooltip-up">
+                                        <p>The total number of tokens in your encoded text.</p>
+                                        <p>This is what you're charged for when using OpenAI's API.</p>
+                                    </div>
+                                </span>
+                            </span>
+                            <span id="token-count" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">
+                                Characters
+                                <span class="info-icon small">
+                                    <span class="material-icons">help_outline</span>
+                                    <div class="tooltip tooltip-up">
+                                        <p>The total number of characters in your input text.</p>
+                                    </div>
+                                </span>
+                            </span>
+                            <span id="char-count" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">
+                                Compression
+                                <span class="info-icon small">
+                                    <span class="material-icons">help_outline</span>
+                                    <div class="tooltip tooltip-up">
+                                        <p>The ratio of characters to tokens (chars:tokens).</p>
+                                        <p>Higher values mean more efficient tokenization. English typically averages 4:1.</p>
+                                    </div>
+                                </span>
+                            </span>
+                            <span id="compression-ratio" class="stat-value">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for encoding details -->
+        <div id="encoder-modal" class="modal">
+            <div class="modal-content animate__animated animate__zoomIn">
+                <div class="modal-header">
+                    <h2 id="modal-title">Encoder Details</h2>
+                    <span class="close-btn">&times;</span>
+                </div>
+                <div class="modal-body" id="encoder-details-container">
+                    <div class="loader">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for token visualization -->
+        <div id="visualization-modal" class="modal">
+            <div class="modal-content animate__animated animate__zoomIn">
+                <div class="modal-header">
+                    <h2>Token Visualization</h2>
+                    <span class="close-btn">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="viz-options">
+                        <button class="viz-btn active" data-viz="text">Text View</button>
+                        <button class="viz-btn" data-viz="blocks">Block View</button>
+                        <button class="viz-btn" data-viz="chart">Distribution</button>
+                        <button class="viz-btn" data-viz="3d">3D Vectors</button>
+                    </div>
+                    <div class="viz-container">
+                        <div id="text-viz" class="viz-panel active"></div>
+                        <div id="blocks-viz" class="viz-panel"></div>
+                        <div id="chart-viz" class="viz-panel">
+                            <canvas id="token-chart"></canvas>
+                        </div>
+                        <div id="vector3d-viz" class="viz-panel">
+                            <div id="vector3d-container"></div>
+                        </div>
+                        <!-- 3D Controls - separate from panel for better control -->
+                        <div class="viz-controls" style="display: none;">
+                            <div class="viz-control">
+                                <label for="rotation-speed">Rotation Speed:</label>
+                                <input type="range" id="rotation-speed" min="0" max="100" value="30">
+                            </div>
+                            <div class="viz-control">
+                                <label for="particle-size">Particle Size:</label>
+                                <input type="range" id="particle-size" min="1" max="20" value="8">
+                            </div>
+                            
+                            <!-- 新增控制选项 -->
+                            <div class="viz-control">
+                                <label for="label-display">Label Display:</label>
+                                <div class="button-group">
+                                    <button id="show-labels-btn" class="action-btn small-btn active">Show</button>
+                                    <button id="hide-labels-btn" class="action-btn small-btn">Hide</button>
+                                </div>
+                            </div>
+                            
+                            <div class="viz-control">
+                                <label for="label-size">Label Size:</label>
+                                <input type="range" id="label-size" min="8" max="20" value="12">
+                            </div>
+                            
+                            <div class="viz-control">
+                                <label for="label-opacity">Label Opacity:</label>
+                                <input type="range" id="label-opacity" min="0" max="100" value="80">
+                            </div>
+                            
+                            <div class="viz-control">
+                                <label for="label-density">Label Density:</label>
+                                <select id="label-density" class="small-select">
+                                    <option value="all">All Labels</option>
+                                    <option value="high" selected>High (75%)</option>
+                                    <option value="medium">Medium (50%)</option>
+                                    <option value="low">Low (25%)</option>
+                                    <option value="none">None</option>
+                                </select>
+                            </div>
+                            
+                            <!-- 添加一个显示向量数据面板的按钮 -->
+                            <div class="viz-control">
+                                <label for="vector-data">Vector Data:</label>
+                                <div class="button-group">
+                                    <button id="show-vector-data-btn" class="action-btn small-btn">Show Data</button>
+                                    <button id="hide-vector-data-btn" class="action-btn small-btn active">Hide Data</button>
+                                </div>
+                            </div>
+                            
+                            <!-- 原有的按钮 -->
+                            <div class="viz-control">
+                                <button id="reset-camera-btn" class="action-btn small-btn">Reset View</button>
+                                <button id="toggle-animation-btn" class="action-btn small-btn">Pause Animation</button>
+                            </div>
+                            
+                            <div class="viz-info">
+                                <p>Use mouse to rotate, scroll to zoom, and right-click to pan</p>
+                                <p>Each colored sphere represents a token in 3D space</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for token info -->
+        <div id="token-info-modal" class="modal">
+            <div class="modal-content animate__animated animate__zoomIn">
+                <div class="modal-header">
+                    <h2>Token Information</h2>
+                    <span class="close-btn">&times;</span>
+                </div>
+                <div class="modal-body" id="token-info-container">
+                    <div class="loader">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <p>&copy; 2023 Tiktoken Visualizer. Powered by <a href="https://github.com/openai/tiktoken" target="_blank">OpenAI's tiktoken</a>.</p>
+    </footer>
+
+    <!-- Add OrbitControls from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.156.1/examples/js/controls/OrbitControls.js"></script>
+    <script src="js/main.js"></script>
+
+    <!-- 添加向量数据面板 -->
+    <div id="vector-data-panel" class="vector-data-panel" style="display: none;">
+        <div class="vector-data-header">
+            <h3>Token Vector Data</h3>
+            <button id="close-vector-data-btn" class="close-btn-small">&times;</button>
+        </div>
+        <div class="vector-data-search">
+            <input type="text" id="vector-search" placeholder="Search token ID...">
+        </div>
+        <div class="vector-data-content">
+            <table id="vector-data-table">
+                <thead>
+                    <tr>
+                        <th>Token ID</th>
+                        <th>Text</th>
+                        <th>X</th>
+                        <th>Y</th>
+                        <th>Z</th>
+                    </tr>
+                </thead>
+                <tbody id="vector-data-tbody">
+                    <!-- JavaScript将填充此内容 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html> 
